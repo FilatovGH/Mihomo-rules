@@ -21,18 +21,25 @@ jobs:
           cat ASN/Kontur/*.ipcidr \
             | sort -u > build/Kontur.ipcidr
 
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Compile MRS using official mihomo image
         run: |
           docker run --rm \
             -v "$PWD:/data" \
-            ghcr.io/metacubex/mihomo \
+            ghcr.io/metacubex/mihomo:v1.19.19 \
             rule-set compile --type ipcidr \
             --input /data/build/Alfa-Bank.ipcidr \
             --output /data/Alfa-Bank.mrs
 
           docker run --rm \
             -v "$PWD:/data" \
-            ghcr.io/metacubex/mihomo \
+            ghcr.io/metacubex/mihomo:v1.19.19 \
             rule-set compile --type ipcidr \
             --input /data/build/Kontur.ipcidr \
             --output /data/Kontur.mrs
