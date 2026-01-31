@@ -4,6 +4,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write   # <-- ОБЯЗАТЕЛЬНО для Releases
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,6 +16,7 @@ jobs:
 
       - name: Install mihomo
         run: |
+          sudo apt update
           curl -L \
             https://github.com/MetaCubeX/mihomo/releases/download/v1.19.9/mihomo-linux-amd64-v1.19.9.deb \
             -o mihomo.deb
@@ -43,7 +47,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: mrs
           path: |
