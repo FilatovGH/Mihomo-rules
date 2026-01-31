@@ -1,8 +1,8 @@
 name: build-mrs
 
 on:
-  workflow_dispatch:
   push:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -11,41 +11,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Aggregate IPCIDR lists
+      - name: Install mihomo
+        run: |
+          curl -L \
+            https://github.com/MetaCubeX/mihomo/releases/download/v1.19.9/mihomo-linux-amd64-v1.19.9.deb \
+            -o mihomo.deb
+          sudo apt install -y ./mihomo.deb
+
+      - name: Aggregate IPCIDR
         run: |
           mkdir -p build
+          cat ASN/Alfa-Bank/*.ipcidr | sort -u > build/Alfa-Bank.ipcidr
+          cat ASN/Kontur/*.ipcidr    | sort -u > build/Kontur.ipcidr
 
-          cat ASN/Alfa-Bank/*.ipcidr \
-            | sort -u > build/Alfa-Bank.ipcidr
-
-          cat ASN/Kontur/*.ipcidr \
-            | sort -u > build/Kontur.ipcidr
-
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Compile MRS using official mihomo image
+      - name: Compile MRS
         run: |
-          docker run --rm \
-            -v "$PWD:/data" \
-            ghcr.io/metacubex/mihomo:v1.19.19 \
-            rule-set compile --type ipcidr \
-            --input /data/build/Alfa-Bank.ipcidr \
-            --output /data/Alfa-Bank.mrs
+          mihomo convert-ruleset ipcidr text \
+            build/Alfa-Bank.ipcidr Alfa-Bank.mrs
 
-          docker run --rm \
-            -v "$PWD:/data" \
-            ghcr.io/metacubex/mihomo:v1.19.19 \
-            rule-set compile --type ipcidr \
-            --input /data/build/Kontur.ipcidr \
-            --output /data/Kontur.mrs
+          mihomo convert-ruleset ipcidr text \
+            build/Kontur.ipcidr Kontur.mrs
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: mrs
           path: |
