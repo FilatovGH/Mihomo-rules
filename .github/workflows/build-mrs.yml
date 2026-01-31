@@ -11,13 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download mihomo
-        run: |
-          curl -L -o mihomo.gz \
-            https://github.com/MetaCubeX/mihomo/releases/latest/download/mihomo-linux-amd64.gz
-          gunzip mihomo.gz
-          chmod +x mihomo
-
       - name: Aggregate IPCIDR lists
         run: |
           mkdir -p build
@@ -28,19 +21,21 @@ jobs:
           cat ASN/Kontur/*.ipcidr \
             | sort -u > build/Kontur.ipcidr
 
-      - name: Compile Alfa-Bank.mrs
+      - name: Compile MRS using official mihomo image
         run: |
-          ./mihomo rule-set compile \
-            --type ipcidr \
-            --input build/Alfa-Bank.ipcidr \
-            --output Alfa-Bank.mrs
+          docker run --rm \
+            -v "$PWD:/data" \
+            ghcr.io/metacubex/mihomo \
+            rule-set compile --type ipcidr \
+            --input /data/build/Alfa-Bank.ipcidr \
+            --output /data/Alfa-Bank.mrs
 
-      - name: Compile Kontur.mrs
-        run: |
-          ./mihomo rule-set compile \
-            --type ipcidr \
-            --input build/Kontur.ipcidr \
-            --output Kontur.mrs
+          docker run --rm \
+            -v "$PWD:/data" \
+            ghcr.io/metacubex/mihomo \
+            rule-set compile --type ipcidr \
+            --input /data/build/Kontur.ipcidr \
+            --output /data/Kontur.mrs
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
