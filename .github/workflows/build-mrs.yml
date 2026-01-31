@@ -5,14 +5,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # <-- ОБЯЗАТЕЛЬНО для Releases
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Install mihomo
         run: |
@@ -22,13 +23,17 @@ jobs:
             -o mihomo.deb
           sudo apt install -y ./mihomo.deb
 
-      - name: Aggregate IPCIDR
+      # =========================
+      # IP / ASN → IPCIDR
+      # =========================
+      - name: Aggregate IPCIDR lists
         run: |
           mkdir -p build
-          cat ASN/Alfa-Bank/*.ipcidr | sort -u > build/Alfa-Bank.ipcidr
-          cat ASN/Kontur/*.ipcidr    | sort -u > build/Kontur.ipcidr
 
-      - name: Compile MRS
+          cat ASN/Alfa-Bank/*.list | sort -u > build/Alfa-Bank.ipcidr
+          cat ASN/Kontur/*.list    | sort -u > build/Kontur.ipcidr
+
+      - name: Compile IP MRS
         run: |
           mihomo convert-ruleset ipcidr text \
             build/Alfa-Bank.ipcidr Alfa-Bank.mrs
@@ -36,17 +41,39 @@ jobs:
           mihomo convert-ruleset ipcidr text \
             build/Kontur.ipcidr Kontur.mrs
 
+      # =========================
+      # DOMAIN → MRS
+      # =========================
+      - name: Compile Domain MRS
+        run: |
+          mihomo convert-ruleset domain text \
+            Domain/Alfa-Bank.list Alfa-Bank-domain.mrs
+
+          mihomo convert-ruleset domain text \
+            Domain/Kontur.list Kontur-domain.mrs
+
+      # =========================
+      # GitHub Release
+      # =========================
       - name: Publish MRS to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: "Latest rule-sets"
+          draft: false
+          prerelease: false
+          make_latest: true
           files: |
             Alfa-Bank.mrs
             Kontur.mrs
+            Alfa-Bank-domain.mrs
+            Kontur-domain.mrs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # =========================
+      # Artifacts (backup/debug)
+      # =========================
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -54,3 +81,5 @@ jobs:
           path: |
             Alfa-Bank.mrs
             Kontur.mrs
+            Alfa-Bank-domain.mrs
+            Kontur-domain.mrs
