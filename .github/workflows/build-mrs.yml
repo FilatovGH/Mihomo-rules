@@ -57,6 +57,7 @@ jobs:
           draft: false
           prerelease: false
           make_latest: true
+          overwrite: true
           files: |
             Alfa-Bank.mrs
             Kontur.mrs
