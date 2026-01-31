@@ -32,6 +32,17 @@ jobs:
           mihomo convert-ruleset ipcidr text \
             build/Kontur.ipcidr Kontur.mrs
 
+      - name: Publish MRS to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Latest rule-sets"
+          files: |
+            Alfa-Bank.mrs
+            Kontur.mrs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: actions/upload-artifact@v4
         with:
           name: mrs
