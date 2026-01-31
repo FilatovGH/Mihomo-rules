@@ -23,9 +23,7 @@ jobs:
             -o mihomo.deb
           sudo apt install -y ./mihomo.deb
 
-      # =========================
-      # IP / ASN → IPCIDR
-      # =========================
+      # IP/ASN - IPCIDR
       - name: Aggregate IPCIDR lists
         run: |
           mkdir -p build
@@ -41,9 +39,7 @@ jobs:
           mihomo convert-ruleset ipcidr text \
             build/Kontur.ipcidr Kontur.mrs
 
-      # =========================
-      # DOMAIN → MRS
-      # =========================
+      # DOMAIN - MRS
       - name: Compile Domain MRS
         run: |
           mihomo convert-ruleset domain text \
@@ -52,9 +48,7 @@ jobs:
           mihomo convert-ruleset domain text \
             Domain/Kontur.list Kontur-domain.mrs
 
-      # =========================
       # GitHub Release
-      # =========================
       - name: Publish MRS to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -71,9 +65,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # =========================
       # Artifacts (backup/debug)
-      # =========================
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
