@@ -1,8 +1,7 @@
-payload:
-  - DOMAIN-SUFFIX,alfabank.ru
-  - DOMAIN-SUFFIX,alfabank.com
-  - DOMAIN-SUFFIX,alfa.bank
-  - DOMAIN-SUFFIX,alfa.link
-  - DOMAIN-SUFFIX,alfa.click
-  - DOMAIN-SUFFIX,alfa.me
-  - DOMAIN-SUFFIX,alfacards.ru
++.alfabank.ru
++.alfabank.com
++.alfa.bank
++.alfa.link
++.alfa.click
++.alfa.me
++.alfacards.ru
