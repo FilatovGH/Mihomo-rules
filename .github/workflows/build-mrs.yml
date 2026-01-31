@@ -1,0 +1,51 @@
+name: build-mrs
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download mihomo
+        run: |
+          curl -L -o mihomo.gz \
+            https://github.com/MetaCubeX/mihomo/releases/latest/download/mihomo-linux-amd64.gz
+          gunzip mihomo.gz
+          chmod +x mihomo
+
+      - name: Aggregate IPCIDR lists
+        run: |
+          mkdir -p build
+
+          cat ASN/Alfa-Bank/*.ipcidr \
+            | sort -u > build/Alfa-Bank.ipcidr
+
+          cat ASN/Kontur/*.ipcidr \
+            | sort -u > build/Kontur.ipcidr
+
+      - name: Compile Alfa-Bank.mrs
+        run: |
+          ./mihomo rule-set compile \
+            --type ipcidr \
+            --input build/Alfa-Bank.ipcidr \
+            --output Alfa-Bank.mrs
+
+      - name: Compile Kontur.mrs
+        run: |
+          ./mihomo rule-set compile \
+            --type ipcidr \
+            --input build/Kontur.ipcidr \
+            --output Kontur.mrs
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mrs
+          path: |
+            Alfa-Bank.mrs
+            Kontur.mrs
